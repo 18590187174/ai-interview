@@ -1,0 +1,61 @@
+# 生产环境编排：仅监听 127.0.0.1，对外由宿主机 Nginx（宝塔）反向代理 + HTTPS
+# 用法：根目录下准备 .env（POSTGRES_PASSWORD / JWT_SECRET_KEY / LLM_API_KEY），然后
+#   docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ai_interview
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ai_interview
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_interview"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: prod
+      LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+psycopg://ai_interview:${POSTGRES_PASSWORD}@db:5432/ai_interview
+      DATABASE_ECHO: "false"
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: HS256
+      CORS_ORIGINS: https://interview.yuququan.online
+      COOKIE_SECURE: "true"
+      COOKIE_SAMESITE: strict
+      UPLOAD_ROOT: /app/var/uploads
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://api.deepseek.com/v1}
+      LLM_MODEL: ${LLM_MODEL:-deepseek-chat}
+    volumes:
+      - upload_data:/app/var/uploads
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2"
+
+  frontend:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  upload_data:
