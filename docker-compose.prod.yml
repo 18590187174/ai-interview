@@ -52,7 +52,8 @@ services:
       context: ./frontend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8080:80"
+      # 服务器 8080 已被其他服务占用，改用 8082；宝塔 Nginx 的 proxy_pass 需指向 8082
+      - "127.0.0.1:8082:80"
     depends_on:
       - backend
 

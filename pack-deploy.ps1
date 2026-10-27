@@ -29,3 +29,11 @@ $zip.Dispose()
 
 $size = (Get-Item $dest).Length / 1MB
 '{0} files, size {1:N2} MB' -f $files.Count, $size
+
+# 校验：列出包内的迁移文件
+$check = [System.IO.Compression.ZipFile]::OpenRead($dest)
+"--- migrations in zip ---"
+$check.Entries.FullName | Where-Object { $_ -like 'backend/alembic/versions/*' }
+"--- key files ---"
+$check.Entries.FullName | Where-Object { $_ -in @('docker-compose.prod.yml', 'frontend/nginx.conf', 'backend/Dockerfile', 'frontend/Dockerfile') }
+$check.Dispose()

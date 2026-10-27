@@ -48,6 +48,8 @@ frontend/
     router/          # 路由与守卫
   tests/
 docs/api.md          # 认证接口契约
+docs/deploy.md       # 本地与线上（腾讯云）部署指南
+pack-deploy.ps1      # 生成部署代码包
 openspec/            # 规格与变更提案
 ```
 
@@ -118,6 +120,8 @@ npm run dev
 ```
 
 开发模式下 Vite 已配置 `/api` 代理到 `http://127.0.0.1:8000`，不配代理变量也可直接联调。
+
+线上（腾讯云 + 宝塔 + HTTPS）部署与更新步骤见 [docs/deploy.md](docs/deploy.md)。
 
 ## 数据库迁移
 
