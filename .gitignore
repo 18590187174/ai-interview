@@ -32,3 +32,6 @@ Thumbs.db
 
 # 日志
 *.log
+
+# 构建压缩包
+dist.zip
