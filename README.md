@@ -177,3 +177,15 @@ openspec list                       # 查看进行中的变更
 /opsx:apply                         # 按任务清单实现
 /opsx:archive                       # 归档并合并到 openspec/specs/
 ```
+
+**工具平台相关页面**：
+
+首页：
+
+![image-20261027114244290](C:\Users\LHC\AppData\Roaming\Typora\typora-user-images\image-20261027114244290.png)
+
+核心功能页：
+
+![image-20261027114335118](C:\Users\LHC\AppData\Roaming\Typora\typora-user-images\image-20261027114335118.png)
+
+![image-20261027114443482](C:\Users\LHC\AppData\Roaming\Typora\typora-user-images\image-20261027114443482.png)
