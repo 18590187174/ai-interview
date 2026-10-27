@@ -1,0 +1,85 @@
+schema: spec-driven
+
+context: |
+  Language: zh-CN
+  All artifacts must be written in zh-CN.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+
+  项目：AI 模拟面试平台（greenfield 新项目，当前仓库尚无代码）。
+  目标：面向求职者的 AI 模拟面试与面试准备平台。
+
+  核心业务（用户已明确，产品只聚焦这条主线）：
+  简历押题 → 开始面试 → 面试报告 → 我的（历史回看）。
+  除支撑该主线所必需的能力外，不做社交、题库社区、邀请奖励等无关功能。
+
+  导航：首页、开始面试、简历押题、知识库（知识库上传入口页面）、我的。
+
+  一、简历押题（Prepare）
+  - 用户填写面试目标信息：目标岗位、工作年限、岗位描述、编程语言（可选）。
+  - 用户上传自己的简历（或选择此前上传过的简历），系统完成简历解析。
+  - 系统将「简历解析结果」+「目标岗位描述」+「系统已有知识库（支持外部上传补充）」一起交给 AI 分析，
+    输出「最有可能被问到」的押题列表，供用户面试前准备。
+  - 押题结果需说明命中依据（来自简历的哪段经历 / 岗位描述的哪条要求 / 知识库的哪份资料）。
+
+  二、开始面试（Interview）
+  - 用户点击「开始面试」进入面试页面，采用一问一答模式，最大程度模拟真实面试场景。
+  - 用户作答方式：打字输入 或 语音输入（两种都要支持）。
+  - AI 逐题提问，用户逐题作答，系统维护完整的面试会话（问题、回答、顺序、时间戳）。
+
+  三、面试报告（Report）
+  - 面试完成后系统给出：本次面试评分、每道问题的参考答案、针对用户实际回答的改进建议。
+
+  四、我的（History）
+  - 每次面试结果都可在「我的」页面查看，可回溯历史面试的评分、问答内容与建议。
+
+  能力域划分（供后续 change 拆分 spec 时复用，避免命名漂移）：
+  - user-auth：注册登录与会话维持。
+  - platform-foundation：工程底座、统一错误与可观测性、迁移基线。
+  - app-shell：统一导航外壳与登录态路由守卫。
+  - resume-management：简历上传、存储、解析与选择。
+  - knowledge-base：知识库管理，支持外部上传文档并对 AI 分析可见。
+  - question-prediction：押题生成（解析结果 + 岗位描述 + 知识库 → AI 分析 → 押题列表）。
+  - interview-session：一问一答面试会话（文本与语音作答）。
+  - interview-report：面试评分、参考答案与回答建议。
+  - user-history：我的页面与历史面试记录回看。
+
+  技术栈（用户已确认）：
+  - 前端：Vue 3 + Vite + TypeScript + Element Plus + Pinia + Vue Router。
+  - 后端：Python FastAPI（Python 3.11+）+ SQLAlchemy 2.0 + Alembic + Pydantic v2 + PostgreSQL。
+  - AI 编排：LangChain（LangGraph 可选），大模型走 OpenAI 兼容接口，模型可配置。
+  - 认证：JWT（Access Token + Refresh Token），密码使用 Argon2/bcrypt 哈希。
+  - 测试：前端 Vitest，后端 Pytest；代码风格：Ruff + ESLint。
+  - 交付：后端 /api/v1 前缀，OpenAPI 文档；前端与后端分离部署。
+
+  约束：
+  - 涉及真实用户简历，属敏感个人信息，必须考虑最小化存储、访问控制与删除能力；
+    简历与面试录音只能被本人访问，须提供彻底删除路径。
+  - AI 生成内容需可追溯（记录使用的模型、提示词版本与生成时间），评分与建议须标明由 AI 生成。
+  - 知识库支持外部上传：需限制文件格式与大小，上传内容须与用户/租户关联并可被移除；
+    检索时须能追溯到被引用的具体文档。
+  - 语音作答涉及录音文件：需考虑音频存储成本、临时文件清理与用户删除权；
+    语音转写（ASR）失败时须有可回退到打字作答的明确路径。
+  - 面试会话是长流程交互：须考虑流式返回、断线恢复与会话状态持久化，避免答案丢失。
+  - 所有规格与变更文档使用简体中文撰写。
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
