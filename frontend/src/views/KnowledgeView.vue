@@ -28,7 +28,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table :data="documents" v-loading="loading" empty-text="暂无文档，先上传一份吧">
+      <el-table class="doc-table" :data="documents" v-loading="loading" empty-text="暂无文档，先上传一份吧">
         <el-table-column prop="name" label="文档名称" min-width="220" show-overflow-tooltip />
         <el-table-column label="大小" width="100">
           <template #default="{ row }">{{ formatSize(row.size_bytes) }}</template>
@@ -64,6 +64,39 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 移动端卡片列表 -->
+      <div class="doc-cards" v-loading="loading">
+        <el-empty
+          v-if="documents.length === 0 && !loading"
+          description="暂无文档，先上传一份吧"
+        />
+        <el-card v-for="doc in documents" :key="doc.id" shadow="never" class="doc-card">
+          <div class="doc-card-head">
+            <span class="doc-name">{{ doc.name }}</span>
+            <el-tag v-if="doc.retrievable" type="success" size="small">已就绪</el-tag>
+            <el-tooltip v-else :content="doc.parse_error || '无法检索'" placement="top">
+              <el-tag type="danger" size="small">不可检索</el-tag>
+            </el-tooltip>
+          </div>
+          <div class="doc-card-meta">
+            <el-tag :type="doc.is_public ? 'success' : 'info'" size="small">
+              {{ doc.is_public ? '公开' : '私有' }}
+            </el-tag>
+            <span>{{ formatSize(doc.size_bytes) }}</span>
+            <span>{{ formatTime(doc.created_at) }}</span>
+            <el-button
+              v-if="!doc.is_public"
+              link
+              type="danger"
+              size="small"
+              @click="onDelete(doc)"
+            >
+              删除
+            </el-button>
+          </div>
+        </el-card>
+      </div>
     </el-card>
   </div>
 </template>
@@ -165,5 +198,44 @@ onMounted(refresh)
 .form-tip {
   font-size: 12px;
   color: var(--el-text-color-secondary);
+}
+
+/* 移动端：表格 → 卡片列表 */
+.doc-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .doc-table {
+    display: none;
+  }
+
+  .doc-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .doc-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .doc-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+  }
+
+  .doc-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
 }
 </style>

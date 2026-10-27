@@ -54,6 +54,12 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden; /* 防个别元素撑破产生横向滚动 */
+}
+
+.el-card {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* 全局氛围背景：柔和光晕 + 细网格 */
@@ -158,6 +164,18 @@ a {
 
 ::selection {
   background: rgba(6, 182, 212, 0.25);
+}
+
+/* ===== 移动端全局微调 ===== */
+@media (max-width: 768px) {
+  /* 卡片头部的说明文字小屏收起，避免标题换行 */
+  .header-tip {
+    display: none;
+  }
+
+  .el-form-item__label {
+    word-break: break-all;
+  }
 }
 
 /* ===== 动效可访问性 ===== */

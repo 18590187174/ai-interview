@@ -20,7 +20,8 @@
         ref="formRef"
         :model="form"
         :rules="rules"
-        label-width="110px"
+        :label-position="isMobile ? 'top' : 'right'"
+        :label-width="isMobile ? undefined : '110px'"
         class="step-body"
       >
         <el-form-item label="目标岗位" prop="target_role">
@@ -311,6 +312,17 @@ async function loadDictOptions(type: DictType, fallback: string[], target: typeo
 }
 
 const step = ref(0)
+
+// 移动端：表单标签置顶，避免 110px 固定标签挤压输入区
+const isMobile = ref(globalThis.innerWidth < 768)
+window.addEventListener(
+  'resize',
+  () => {
+    isMobile.value = globalThis.innerWidth < 768
+  },
+  { passive: true },
+)
+
 const formRef = ref<FormInstance>()
 const form = reactive({
   target_role: '',
@@ -539,6 +551,28 @@ defineExpose({ step, form, selectedResumeId, resumes, goStepTwo, generate })
 .step-body {
   max-width: 720px;
   margin: 0 auto;
+}
+
+/* 移动端：步骤条紧凑、卡片头提示收起、防横向溢出 */
+@media (max-width: 768px) {
+  .quiz-page,
+  .step-body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .card-header .header-tip {
+    display: none;
+  }
+
+  .steps :deep(.el-step__title) {
+    font-size: 12px;
+  }
+
+  .steps :deep(.el-step__icon) {
+    width: 24px;
+    height: 24px;
+  }
 }
 
 .resume-list {

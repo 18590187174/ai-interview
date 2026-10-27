@@ -51,6 +51,9 @@ services:
     build:
       context: ./frontend
     restart: unless-stopped
+    # 静态文件走挂载：本地 npm run build 后只上传 dist 覆盖，nginx reload 即生效，无需重建镜像
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
     ports:
       # 服务器 8080 已被其他服务占用，改用 8082；宝塔 Nginx 的 proxy_pass 需指向 8082
       - "127.0.0.1:8082:80"

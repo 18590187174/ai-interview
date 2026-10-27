@@ -112,7 +112,7 @@ const steps = [
 
 .hero-title {
   margin: 18px 0 10px;
-  font-size: 38px;
+  font-size: clamp(24px, 6vw, 38px);
   font-weight: 800;
   letter-spacing: 1px;
   color: var(--text-primary);

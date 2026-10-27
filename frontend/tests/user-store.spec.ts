@@ -103,4 +103,41 @@ describe('用户状态仓库', () => {
     expect(store.accessToken).toBeNull()
     expect(store.user).toBeNull()
   })
+
+  describe('会话恢复（页面刷新后静默续期）', () => {
+    it('刷新令牌有效时恢复登录态与用户信息', async () => {
+      mocked.refresh.mockResolvedValue(tokenPair('access-restored'))
+      mocked.fetchMe.mockResolvedValue(userInfo)
+
+      const store = useUserStore()
+      const restored = await store.restoreSession()
+
+      expect(restored).toBe(true)
+      expect(store.accessToken).toBe('access-restored')
+      expect(store.isAuthenticated).toBe(true)
+      expect(store.user?.email).toBe(userInfo.email)
+    })
+
+    it('恢复失败时清空登录态且本会话不再重试', async () => {
+      mocked.refresh.mockRejectedValue(new Error('no cookie'))
+      mocked.fetchMe.mockResolvedValue(userInfo)
+
+      const store = useUserStore()
+      expect(await store.restoreSession()).toBe(false)
+      expect(store.isAuthenticated).toBe(false)
+
+      // 即使后续刷新令牌可用，本会话也不再第二次尝试
+      mocked.refresh.mockResolvedValue(tokenPair('access-again'))
+      expect(await store.restoreSession()).toBe(false)
+      expect(mocked.refresh).toHaveBeenCalledTimes(1)
+    })
+
+    it('已有访问令牌时无需恢复', async () => {
+      const store = useUserStore()
+      store.accessToken = 'access-1'
+
+      expect(await store.restoreSession()).toBe(true)
+      expect(mocked.refresh).not.toHaveBeenCalled()
+    })
+  })
 })

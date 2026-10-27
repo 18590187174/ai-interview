@@ -63,7 +63,7 @@
 
         <template v-if="pastSessions.length > 0">
           <h4 class="section-title">历史面试</h4>
-          <el-table :data="pastSessions" size="small">
+          <el-table class="history-table" :data="pastSessions" size="small">
             <el-table-column prop="target_role" label="岗位" min-width="160" />
             <el-table-column label="状态" width="90">
               <template #default="{ row }">
@@ -81,6 +81,22 @@
               </template>
             </el-table-column>
           </el-table>
+
+          <!-- 移动端卡片列表 -->
+          <div class="history-cards">
+            <el-card v-for="row in pastSessions" :key="row.id" shadow="never" class="history-card">
+              <div class="history-row">
+                <span class="history-role">{{ row.target_role }}</span>
+                <el-tag :type="row.status === 'completed' ? 'success' : 'info'" size="small">
+                  {{ row.status === 'completed' ? '已完成' : '已放弃' }}
+                </el-tag>
+              </div>
+              <div class="history-meta">
+                <span>作答 {{ row.answered_count }}/{{ row.total_questions }}</span>
+                <el-button link type="primary" size="small" @click="viewHistory(row.id)">查看</el-button>
+              </div>
+            </el-card>
+          </div>
         </template>
       </el-card>
     </template>
@@ -573,5 +589,43 @@ onMounted(refresh)
   justify-content: flex-end;
   gap: 12px;
   margin-top: 12px;
+}
+
+/* 移动端：历史表格 → 卡片列表 */
+.history-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .history-table {
+    display: none;
+  }
+
+  .history-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .history-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .history-role {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .history-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
 }
 </style>

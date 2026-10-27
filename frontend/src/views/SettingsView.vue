@@ -62,6 +62,7 @@
           </el-form>
 
           <el-table
+            class="dict-table"
             :data="itemsOf(group.type)"
             v-loading="loading"
             empty-text="暂无选项，添加后将在押题向导中生效"
@@ -74,6 +75,26 @@
               </template>
             </el-table-column>
           </el-table>
+
+          <!-- 移动端卡片列表 -->
+          <div class="dict-cards" v-loading="loading">
+            <el-empty
+              v-if="itemsOf(group.type).length === 0 && !loading"
+              description="暂无选项，添加后将在押题向导中生效"
+            />
+            <el-card
+              v-for="item in itemsOf(group.type)"
+              :key="item.id"
+              shadow="never"
+              class="dict-card"
+            >
+              <div class="dict-card-row">
+                <span class="dict-label">{{ item.label }}</span>
+                <el-button link type="danger" size="small" @click="onDelete(item)">删除</el-button>
+              </div>
+              <div class="dict-value">{{ item.value }}</div>
+            </el-card>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-card>
@@ -252,5 +273,50 @@ async function onSaveLLM(): Promise<void> {
 
 .add-form {
   margin-bottom: 8px;
+}
+
+/* 移动端：表格 → 卡片列表，表单标签置顶 */
+.dict-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .dict-table {
+    display: none;
+  }
+
+  .dict-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dict-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .dict-label {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .dict-value {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    word-break: break-all;
+  }
+
+  .llm-form :deep(.el-form-item__label) {
+    width: 100% !important;
+    text-align: left;
+  }
+
+  .llm-form :deep(.el-form-item__content) {
+    margin-left: 0 !important;
+  }
 }
 </style>

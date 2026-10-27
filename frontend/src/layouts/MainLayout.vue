@@ -39,7 +39,13 @@
         <span class="user-email" :title="store.user?.email ?? ''">
           {{ store.user?.email ?? '未登录' }}
         </span>
-        <el-button link class="logout-link" @click="onLogout">退出登录</el-button>
+        <el-button link class="logout-link" aria-label="退出登录" @click="onLogout">
+          <span class="logout-text">退出登录</span>
+          <svg class="logout-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5M21 12H9" />
+          </svg>
+        </el-button>
       </div>
     </header>
 
@@ -50,6 +56,20 @@
         </keep-alive>
       </router-view>
     </el-main>
+
+    <!-- 移动端底部导航：五项固定入口 -->
+    <nav class="tab-bar" aria-label="主导航">
+      <router-link
+        v-for="item in navItems"
+        :key="item.name"
+        :to="pathOf(item.name)"
+        class="tab-item"
+        :class="{ active: isActive(item) }"
+      >
+        <span class="tab-icon" v-html="tabIcons[item.name]"></span>
+        <span class="tab-label">{{ item.label }}</span>
+      </router-link>
+    </nav>
   </el-container>
 </template>
 
@@ -66,6 +86,15 @@ const store = useUserStore()
 
 // KeepAlive 缓存的多步流程页面（登出时清空以重置状态）
 const keepAliveViews = ref<string[]>(['ResumeQuizView', 'InterviewView'])
+
+// 底部导航图标（移动端）
+const tabIcons: Record<string, string> = {
+  home: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+  interview: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H5l-2 2V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z"/><path d="M9 11h.01M13 11h.01M17 11h.01"/></svg>',
+  'resume-quiz': '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>',
+  knowledge: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+  profile: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+}
 
 function pathOf(name: string): string {
   return name === 'home' ? '/' : `/${name}`
@@ -152,7 +181,7 @@ async function onLogout(): Promise<void> {
 
 .nav-link:hover {
   color: var(--text-primary);
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(100, 116, 139, 0.1);
 }
 
 .nav-link.active {
@@ -179,14 +208,15 @@ async function onLogout(): Promise<void> {
   align-items: center;
   gap: 12px;
   white-space: nowrap;
+  margin-left: auto;
 }
 
 .settings-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 8px;
   color: var(--text-secondary);
   transition:
@@ -197,7 +227,7 @@ async function onLogout(): Promise<void> {
 .settings-link:hover,
 .settings-link.active {
   color: var(--brand-cyan);
-  background: rgba(34, 211, 238, 0.1);
+  background: rgba(6, 182, 212, 0.1);
 }
 
 .user-email {
@@ -210,6 +240,7 @@ async function onLogout(): Promise<void> {
 
 .logout-link {
   color: var(--text-secondary);
+  min-height: 40px;
 }
 
 .logout-link:hover {
@@ -218,5 +249,81 @@ async function onLogout(): Promise<void> {
 
 .app-main {
   padding: 32px 24px 48px;
+}
+
+/* ===== 移动端底部导航（默认隐藏） ===== */
+.tab-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    height: 52px;
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .brand-name {
+    font-size: 14px;
+  }
+
+  .nav-menu {
+    display: none;
+  }
+
+  .user-email {
+    display: none;
+  }
+
+  .logout-text {
+    display: none;
+  }
+
+  .logout-link {
+    padding: 0 10px;
+  }
+
+  .app-main {
+    padding: 16px 12px 84px; /* 底部为 TabBar 预留空间 */
+  }
+
+  .tab-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    display: flex;
+    height: 62px;
+    background: rgba(255, 255, 255, 0.94);
+    border-top: 1px solid var(--surface-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--text-secondary);
+    transition: color var(--transition-ui);
+  }
+
+  .tab-item.active {
+    color: var(--brand-blue);
+  }
+
+  .tab-label {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .tab-item.active .tab-label {
+    font-weight: 600;
+  }
 }
 </style>

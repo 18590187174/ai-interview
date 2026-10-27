@@ -203,6 +203,36 @@ docker compose -f docker-compose.prod.yml up -d --build
 docker compose -f docker-compose.prod.yml logs -f backend
 ```
 
+### 只更新前端（不重建镜像、不动数据库）
+
+`docker-compose.prod.yml` 中 frontend 已挂载 `./frontend/dist`，因此更新前端只需替换静态文件：
+
+**1. 本地构建并打包 dist**
+
+```powershell
+cd frontend
+npm run build                      # 会先执行 vue-tsc 类型检查
+Compress-Archive -Path "dist\*" -DestinationPath "..\dist.zip" -Force
+```
+
+**2. 上传 `dist.zip`，解压覆盖到 `/www/wwwroot/ai-interview/frontend/dist`**
+
+**3. 让容器加载新文件**
+
+```bash
+cd /www/wwwroot/ai-interview
+docker compose -f docker-compose.prod.yml exec frontend nginx -s reload
+curl -I http://127.0.0.1:8082
+```
+
+若容器尚未挂载过（首次切换），需要先执行：
+
+```bash
+docker compose -f docker-compose.prod.yml up -d frontend
+```
+
+> 覆盖 dist 前务必确保上传的是完整构建产物，否则页面会 404。
+
 回滚：
 
 ```bash

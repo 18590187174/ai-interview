@@ -60,8 +60,24 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to) => {
+let restoreInFlight: Promise<void> | null = null
+
+router.beforeEach(async (to) => {
   const store = useUserStore()
+
+  // 内存令牌丢失（页面刷新）时，先用 Cookie 中的刷新令牌静默恢复会话
+  if (!store.isAuthenticated && !restoreInFlight) {
+    restoreInFlight = store
+      .restoreSession()
+      .then(() => undefined)
+      .catch(() => undefined)
+      .finally(() => {
+        restoreInFlight = null
+      })
+  }
+  if (!store.isAuthenticated && restoreInFlight) {
+    await restoreInFlight
+  }
 
   if (!to.meta.public && !store.isAuthenticated) {
     return { name: 'login', query: { redirect: to.fullPath } }

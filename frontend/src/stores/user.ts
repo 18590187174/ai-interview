@@ -9,9 +9,34 @@ export const useUserStore = defineStore('user', () => {
   const accessToken = ref<string | null>(null)
   const user = ref<UserInfo | null>(null)
   let refreshInFlight: Promise<string | null> | null = null
+  // 每个页面会话只尝试一次会话恢复（刷新令牌在 httpOnly Cookie 中）
+  const restoreAttempted = ref(false)
 
   const isAuthenticated = computed(() => accessToken.value !== null)
   const isAdmin = computed(() => user.value?.is_admin === true)
+
+  /**
+   * 页面刷新后用 httpOnly Cookie 中的刷新令牌静默恢复登录态，
+   * 避免内存令牌丢失导致被守卫踢到登录页。
+   */
+  async function restoreSession(): Promise<boolean> {
+    if (accessToken.value) {
+      return true
+    }
+    if (restoreAttempted.value) {
+      return false
+    }
+    restoreAttempted.value = true
+    try {
+      const tokens = await authApi.refresh()
+      accessToken.value = tokens.access_token
+      user.value = await authApi.fetchMe()
+      return true
+    } catch {
+      clearSession()
+      return false
+    }
+  }
 
   async function login(payload: Credentials): Promise<void> {
     const tokens = await authApi.login(payload)
@@ -65,6 +90,7 @@ export const useUserStore = defineStore('user', () => {
     user,
     isAuthenticated,
     isAdmin,
+    restoreSession,
     login,
     registerAccount,
     loadProfile,

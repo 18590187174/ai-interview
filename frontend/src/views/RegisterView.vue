@@ -100,7 +100,7 @@ async function onSubmit(): Promise<void> {
 }
 
 .auth-card {
-  width: 400px;
+  width: min(400px, 100%);
 }
 
 .title {

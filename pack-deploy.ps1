@@ -6,7 +6,7 @@ $dest = 'e:\ai项目\AI模拟面试平台-deploy.zip'
 
 if (Test-Path $dest) { Remove-Item $dest -Force }
 
-$excludeDirs = @('node_modules', '.venv', 'dist', 'var', '__pycache__', '.git', '.pytest_cache', 'egg-info', '.codebuddy', 'openspec', '.ruff_cache')
+$excludeDirs = @('node_modules', '.venv', 'var', '__pycache__', '.git', '.pytest_cache', 'egg-info', '.codebuddy', 'openspec', '.ruff_cache')
 $excludeExt = @('.pyc', '.db', '.log', '.png', '.ps1')
 
 $files = Get-ChildItem -Path $root -Recurse -File -Force | Where-Object {
