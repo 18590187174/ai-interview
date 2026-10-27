@@ -18,14 +18,33 @@ class TestGetLLMSettings:
     def test_requires_auth(self, client) -> None:
         assert client.get("/api/v1/settings/llm").status_code == 401
 
-    def test_none_source_when_unconfigured(self, client, registered_user) -> None:
+    def test_read_requires_admin(self, client, registered_user) -> None:
         _login(client, registered_user)
+        response = client.get("/api/v1/settings/llm")
+        assert response.status_code == 403
+        assert response.json()["code"] == "FORBIDDEN"
+
+    def test_update_requires_admin(self, client, registered_user) -> None:
+        _login(client, registered_user)
+        response = client.put("/api/v1/settings/llm", json={"model": "deepseek-chat"})
+        assert response.status_code == 403
+        assert response.json()["code"] == "FORBIDDEN"
+
+    def test_me_returns_is_admin_flag(self, client, registered_user, admin_user) -> None:
+        _login(client, registered_user)
+        assert client.get("/api/v1/users/me").json()["is_admin"] is False
+
+        _login(client, admin_user)
+        assert client.get("/api/v1/users/me").json()["is_admin"] is True
+
+    def test_none_source_when_unconfigured(self, client, admin_user) -> None:
+        _login(client, admin_user)
         body = client.get("/api/v1/settings/llm").json()
         assert body["has_api_key"] is False
         assert body["source"] == "none"
 
-    def test_mask_never_returns_full_key(self, client, registered_user) -> None:
-        _login(client, registered_user)
+    def test_mask_never_returns_full_key(self, client, admin_user) -> None:
+        _login(client, admin_user)
         client.put("/api/v1/settings/llm", json={"api_key": "sk-test-1234567890abcd"})
         body = client.get("/api/v1/settings/llm").json()
 
@@ -37,8 +56,8 @@ class TestGetLLMSettings:
 
 
 class TestUpdateLLMSettings:
-    def test_update_key_keeps_when_absent(self, client, registered_user) -> None:
-        _login(client, registered_user)
+    def test_update_key_keeps_when_absent(self, client, admin_user) -> None:
+        _login(client, admin_user)
         client.put("/api/v1/settings/llm", json={"api_key": "sk-key-first"})
 
         response = client.put("/api/v1/settings/llm", json={"model": "deepseek-reasoner"})
@@ -49,8 +68,8 @@ class TestUpdateLLMSettings:
         assert body["model"] == "deepseek-reasoner"
         assert body["api_key_masked"].endswith("irst")
 
-    def test_clear_key_falls_back(self, client, registered_user) -> None:
-        _login(client, registered_user)
+    def test_clear_key_falls_back(self, client, admin_user) -> None:
+        _login(client, admin_user)
         client.put("/api/v1/settings/llm", json={"api_key": "sk-to-be-cleared"})
         response = client.put("/api/v1/settings/llm", json={"api_key": ""})
         assert response.status_code == 200
@@ -59,15 +78,15 @@ class TestUpdateLLMSettings:
         assert body["has_api_key"] is False
         assert body["source"] == "none"
 
-    def test_invalid_base_url_rejected(self, client, registered_user) -> None:
-        _login(client, registered_user)
+    def test_invalid_base_url_rejected(self, client, admin_user) -> None:
+        _login(client, admin_user)
         response = client.put(
             "/api/v1/settings/llm", json={"base_url": "ftp://not-http"}
         )
         assert response.status_code == 422
 
-    def test_runtime_config_prefers_database(self, client, db_session, registered_user) -> None:
-        _login(client, registered_user)
+    def test_runtime_config_prefers_database(self, client, db_session, admin_user) -> None:
+        _login(client, admin_user)
         client.put(
             "/api/v1/settings/llm",
             json={

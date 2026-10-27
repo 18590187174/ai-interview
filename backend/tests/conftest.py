@@ -90,3 +90,21 @@ def registered_user(client) -> dict:
     )
     assert response.status_code == 201, response.text
     return {"email": email, "password": password, "id": response.json()["id"]}
+
+
+@pytest.fixture
+def admin_user(db_session) -> dict:
+    """创建一个管理员账号（is_admin=True）并返回登录凭证。"""
+    from app.models.user import User
+    from app.services.password import hash_password
+
+    email = f"admin-{os.urandom(4).hex()}@example.com"
+    admin = User(
+        email=email,
+        password_hash=hash_password("Passw0rd1"),
+        email_verified=True,
+        is_admin=True,
+    )
+    db_session.add(admin)
+    db_session.commit()
+    return {"email": email, "password": "Passw0rd1", "id": str(admin.id)}

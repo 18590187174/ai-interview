@@ -19,6 +19,7 @@ const userInfo: UserInfo = {
   id: 'user-1',
   email: 'candidate@example.com',
   email_verified: false,
+  is_admin: false,
   created_at: '2026-10-26T05:00:00Z',
 }
 

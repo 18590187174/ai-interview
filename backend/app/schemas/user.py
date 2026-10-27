@@ -14,4 +14,5 @@ class UserRead(BaseModel):
     id: uuid.UUID
     email: str
     email_verified: bool
+    is_admin: bool
     created_at: datetime

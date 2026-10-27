@@ -11,6 +11,7 @@ export const useUserStore = defineStore('user', () => {
   let refreshInFlight: Promise<string | null> | null = null
 
   const isAuthenticated = computed(() => accessToken.value !== null)
+  const isAdmin = computed(() => user.value?.is_admin === true)
 
   async function login(payload: Credentials): Promise<void> {
     const tokens = await authApi.login(payload)
@@ -63,6 +64,7 @@ export const useUserStore = defineStore('user', () => {
     accessToken,
     user,
     isAuthenticated,
+    isAdmin,
     login,
     registerAccount,
     loadProfile,

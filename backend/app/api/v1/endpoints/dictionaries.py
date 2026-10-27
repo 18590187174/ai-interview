@@ -7,7 +7,7 @@ import uuid
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.dictionary import DictItemCreate, DictItemOut
@@ -39,7 +39,7 @@ def list_by_type(
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=DictItemOut)
 def create_item(
     payload: DictItemCreate,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> DictItemOut:
     item = dictionary_service.create_item(db, payload)
@@ -49,7 +49,7 @@ def create_item(
 @router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item(
     item_id: uuid.UUID,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_admin),
     db: Session = Depends(get_db),
 ) -> None:
     dictionary_service.delete_item(db, item_id)

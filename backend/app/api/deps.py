@@ -34,3 +34,10 @@ def get_current_user(
 def get_storage(settings: Settings = Depends(get_settings)) -> Storage:
     """文件存储依赖：测试可通过 dependency_overrides 注入临时目录。"""
     return LocalStorage(settings.upload_root)
+
+
+def require_admin(user: User = Depends(get_current_user)) -> User:
+    """管理员权限依赖：已登录但角色不足时返回 403。"""
+    if not user.is_admin:
+        raise AppError(403, ErrorCode.FORBIDDEN, "该操作仅管理员可用")
+    return user

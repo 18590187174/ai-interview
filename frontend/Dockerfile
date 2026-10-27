@@ -3,7 +3,7 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 COPY package.json ./
-RUN npm install
+RUN npm config set registry https://mirrors.cloud.tencent.com/npm/ && npm install
 COPY . .
 RUN npm run build
 

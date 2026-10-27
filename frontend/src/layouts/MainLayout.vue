@@ -24,6 +24,7 @@
 
       <div class="user-area">
         <router-link
+          v-if="store.isAdmin"
           :to="{ name: 'settings' }"
           class="settings-link"
           :class="{ active: route.name === 'settings' }"

@@ -44,8 +44,13 @@ const routes: RouteRecordRaw[] = [
       { path: 'resume-quiz', name: 'resume-quiz', component: ResumeQuizView },
       { path: 'knowledge', name: 'knowledge', component: KnowledgeView },
       { path: 'profile', name: 'profile', component: ProfileView },
-      // 设置页不进入主导航（导航固定五项），从顶栏用户区进入
-      { path: 'settings', name: 'settings', component: SettingsView },
+      // 设置页不进入主导航（导航固定五项），从顶栏用户区进入，仅管理员可见
+      {
+        path: 'settings',
+        name: 'settings',
+        component: SettingsView,
+        meta: { requiresAdmin: true },
+      },
     ],
   },
 ]
@@ -63,6 +68,11 @@ router.beforeEach((to) => {
   }
 
   if (store.isAuthenticated && (to.name === 'login' || to.name === 'register')) {
+    return { name: 'home' }
+  }
+
+  // 管理员页面：非管理员重定向首页
+  if (to.meta.requiresAdmin && !store.isAdmin) {
     return { name: 'home' }
   }
 

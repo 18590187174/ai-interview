@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import require_admin
 from app.core.config import Settings, get_settings
 from app.core.database import get_db
 from app.core.errors import AppError, ErrorCode
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/settings", tags=["settings"])
 
 @router.get("/llm", response_model=LLMSettingsOut)
 def get_llm_settings(
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_admin),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> LLMSettingsOut:
@@ -29,7 +29,7 @@ def get_llm_settings(
 @router.put("/llm", response_model=LLMSettingsSaveOut)
 def update_llm_settings(
     payload: LLMSettingsUpdate,
-    user: User = Depends(get_current_user),
+    user: User = Depends(require_admin),
     db: Session = Depends(get_db),
     settings: Settings = Depends(get_settings),
 ) -> LLMSettingsSaveOut:
